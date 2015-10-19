@@ -2,7 +2,7 @@
 
 '''Routines for creating count and binary fingerprints from molecules'''
 
-import sys,argparse,collections,re
+import sys,argparse,collections,re,gzip
 import numpy as np
 from rdkit.Chem import AllChem as Chem
 from rdkit.Chem import MACCSkeys
@@ -70,6 +70,12 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
+    #support gzipped output - these files are big
+    if args.outfile.name.endswith('.gz'):
+        out = gzip.GzipFile(fileobj=args.outfile)
+    else:
+        out = args.outfile
+        
     with open(args.smi) as f:
         for line in f:
             if line.startswith('#') or len(line.strip()) == 0:
@@ -77,5 +83,6 @@ if __name__ == "__main__":
             tokens = line.split()
             mol = Chem.MolFromSmiles(tokens[0])
             fp = calcfingerprint(mol, args)
-            print fp
-            print line.rstrip(),' '.join(map(str,fp))
+            #we define the output to have exactly two columns before the bits
+            #hopefully the last thing is the affinity?
+            out.write('%s %s %s\n' % (tokens[0],tokens[-1],' '.join(map(str,fp))))

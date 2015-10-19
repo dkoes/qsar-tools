@@ -14,10 +14,9 @@ for each molecule for use with training a model
 
 ## trainlinearmodel.py
 
-Given a fingerprint file (or set of compounds) train a linear model to predict
-a numerical quantity of interest.  This quantity is assumed to be the last
-space-delimited token of the compound's name.  Outputs model along with
-cross-validation statistics.
+Given a fingerprint file train a linear model to predict
+a numerical quantity of interest.  This quantity is assumed to be the second
+column of the file.  Outputs model along with cross-validation statistics.
 
 ## predict.py
 
