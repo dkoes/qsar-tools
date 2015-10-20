@@ -26,6 +26,7 @@ def trainmodels(m, x, y):
             #try larger number of components until average CV perf decreases
             pls = PLSRegression(i)
             scores = []
+            #TODO: parallelize below
             for train,test in kf:
                 xtrain = x[train]
                 ytrain = y[train]
@@ -47,7 +48,7 @@ def trainmodels(m, x, y):
         print "PLS components =",i
 
     elif m == 'lasso':
-        model = LassoCV(max_iter=10000)
+        model = LassoCV(max_iter=10000,n_jobs=-1)
         model.fit(x,y)
         unfit = Lasso(alpha=model.alpha_,max_iter=10000)
         print "LASSO alpha =",model.alpha_
@@ -58,7 +59,7 @@ def trainmodels(m, x, y):
         print "Ridge alpha =",model.alpha_
         unfit = Ridge(alpha=model.alpha_)
     else:
-        model = ElasticNetCV(max_iter=10000)
+        model = ElasticNetCV(max_iter=10000,n_jobs=-1)
         model.fit(x,y)
         print "Elastic alpha =",model.alpha_," l1_ratio =",model.l1_ratio_
         unfit = ElasticNet(alpha=model.alpha_,l1_ratio=model.l1_ratio_,max_iter=10000)
@@ -95,7 +96,7 @@ if __name__ == "__main__":
     
     (fit,unfit) = trainmodels(args.model, x, y)
     fitscore = scoremodel(fit,x,y)
-    print "Full Regression:",fitscore
+    print "Full Regression: %.3f" % fitscore
     nz = np.count_nonzero(fit.coef_)
     print "Nonzeros: %d (%.2f%%)" % (nz,nz/float(len(fit.coef_)))
     kf = KFold(len(y), n_folds=3)
@@ -109,4 +110,5 @@ if __name__ == "__main__":
         scores.append(scoremodel(unfit, xtest, ytest))
         
     print "CV: %.3f (std %.3f)" %( np.mean(scores),np.std(scores))
+    print "Gap: %.4f" % (fitscore-np.mean(scores))
             
