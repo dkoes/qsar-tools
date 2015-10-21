@@ -49,9 +49,9 @@ def trainmodels(m, x, y):
         print "PLS components =",besti
 
     elif m == 'lasso':
-        model = LassoCV(max_iter=10000,n_jobs=-1)
+        model = LassoCV(n_jobs=-1)
         model.fit(x,y)
-        unfit = Lasso(alpha=model.alpha_,max_iter=10000)
+        unfit = Lasso(alpha=model.alpha_)
         print "LASSO alpha =",model.alpha_
         return (model,unfit)
     elif m == 'ridge':
@@ -60,7 +60,7 @@ def trainmodels(m, x, y):
         print "Ridge alpha =",model.alpha_
         unfit = Ridge(alpha=model.alpha_)
     else:
-        model = ElasticNetCV(max_iter=10000,n_jobs=-1,l1_ratio=[.1, .5, .7, .9, .95, .99, 1])
+        model = ElasticNetCV(n_jobs=-1,l1_ratio=[.1, .5, .7, .9, .95, .99, 1])
         model.fit(x,y)
         print "Elastic alpha =",model.alpha_," l1_ratio =",model.l1_ratio_
         unfit = ElasticNet(alpha=model.alpha_,l1_ratio=model.l1_ratio_,max_iter=10000)
