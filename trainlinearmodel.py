@@ -74,6 +74,7 @@ if __name__ == "__main__":
     parser.add_argument('input',help='Fingerprints input file')
     parser.add_argument('-o','--outfile', type=argparse.FileType('w'), help="Output file for model (trained on full data)")
     parser.add_argument('-k','--kfolds',type=int,default=3,help="Number of folds for cross-validation")
+    parser.add_argument('-y','--affinities',help="Affinities (y-values). Will override any specified in fingerprints file")
     
     models = parser.add_mutually_exclusive_group()
     models.add_argument('--lasso',action='store_const',dest='model',const='lasso',help="Use LASSO linear model")
@@ -88,12 +89,22 @@ if __name__ == "__main__":
     
     comp = 'gzip' if args.input.endswith('.gz') else None
     data = pd.read_csv(args.input,compression=comp,header=None,delim_whitespace=True)
+    
+    if args.affinities: #override what is in fingerprint file
+        y = np.genfromtxt(args.affinities,np.float)
+        if len(y) != len(data):
+            print "Mismatched length between affinities and fingerprints (%d vs %d)" % (len(y),len(x))
+            sys.exit(-1)
+        data.iloc[:,1] = y
+    
+    np.random.seed(0) #I like reproducible results, so fix a seed
     data = data.iloc[np.random.permutation(len(data))] #shuffle order of data
     smi = np.array(data.iloc[:,0])
+    
+
     y = np.array(data.iloc[:,1],dtype=np.float)
     x = np.array(data.iloc[:,2:],dtype=np.float)
-    del data #dispose of pandas copy
-    
+    del data #dispose of pandas copy    
     
     (fit,unfit) = trainmodels(args.model, x, y)
     fitscore = scoremodel(fit,x,y)
