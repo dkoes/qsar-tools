@@ -26,4 +26,4 @@ of interest.
 ## visualizesmartsmodel.py
 
 Given a model trained using smarts descriptors and a compound, map the model
-onto the compound a
+onto the compound and produce an image.
