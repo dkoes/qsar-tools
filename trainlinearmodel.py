@@ -98,7 +98,7 @@ if __name__ == "__main__":
     fitscore = scoremodel(fit,x,y)
     print "Full Regression: %.3f" % fitscore
     nz = np.count_nonzero(fit.coef_)
-    print "Nonzeros: %d (%.2f%%)" % (nz,nz/float(len(fit.coef_)))
+    print "Nonzeros: %d (%.2f%%)" % (nz,100.0*nz/float(len(fit.coef_)))
     kf = KFold(len(y), n_folds=3)
     scores = []
     for train,test in kf:

@@ -85,4 +85,6 @@ if __name__ == "__main__":
             fp = calcfingerprint(mol, args)
             #we define the output to have exactly two columns before the bits
             #hopefully the last thing is the affinity?
-            out.write('%s %s %s\n' % (tokens[0],tokens[-1],' '.join(map(str,fp))))
+            aff = tokens[-1]
+            if len(tokens) == 1: aff = "_"  #if no affinity, blank
+            out.write('%s %s %s\n' % (tokens[0],aff,' '.join(map(str,fp))))
