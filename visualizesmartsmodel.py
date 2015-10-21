@@ -75,15 +75,16 @@ if __name__ == "__main__":
     weights = [w/maxval for w in weights]
     
     #make a custom red - white - green color map
+    #slight tint so O and Cl are still visible
     cdict = {'red': ( (0.0, 1.0, 1.0),
                       (0.5, 1.0, 1.0),
-                      (1.0, 0.0, 0.0)),
-             'green': ( (0.0, 0.0, 0.0),
+                      (1.0, 0.2, 0.2)),
+             'green': ( (0.0, 0.2, 0.2),
                       (0.5, 1.0, 1.0),
                       (1.0, 1.0, 1.0)),
-             'blue': ( (0.0, 0.0, 0.0),
+             'blue': ( (0.0, 0.2, 0.2),
                       (0.5, 1.0, 1.0),
-                      (1.0, 0.0, 0.0))};
+                      (1.0, 0.2, 0.2))};
     colors = LinearSegmentedColormap('RWG',cdict)
     
    
