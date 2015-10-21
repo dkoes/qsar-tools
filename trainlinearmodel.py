@@ -12,10 +12,11 @@ def scoremodel(model, x, y):
     p = model.predict(x).squeeze()
     return np.corrcoef(p,y)[0,1]
 
-def trainmodels(m, x, y):
+def trainmodels(m, x, y, iter=1000):
     '''For the model type m, train a model on x->y using built-in CV to
-    parameterize.  Return both this model and an unfit model initialized using
-    the paramters determined. This second model can be used for CV.'''
+    parameterize.  Return both this model and an unfit model that can be used for CV.
+    Note for PLS we cheat a little bit since there isn't a built-in CV trainer.
+    '''
     
     if m == 'pls':
         #have to manually cross-validate to choose number of components
@@ -45,25 +46,25 @@ def trainmodels(m, x, y):
         
         model = PLSRegression(besti) 
         model.fit(x,y)
-        unfit = PLSRegression(besti)
+        unfit = PLSRegression(besti)  #choose number of components using full data - iffy
         print "PLS components =",besti
 
     elif m == 'lasso':
-        model = LassoCV(n_jobs=-1)
+        model = LassoCV(n_jobs=-1,max_iter=iter)
         model.fit(x,y)
-        unfit = Lasso(alpha=model.alpha_)
+        unfit = LassoCV(n_jobs=-1,max_iter=iter) #(alpha=model.alpha_)
         print "LASSO alpha =",model.alpha_
         return (model,unfit)
     elif m == 'ridge':
-        model = RidgeCV()
+        model = RidgeCV(max_iter=iter)
         model.fit(x,y)
         print "Ridge alpha =",model.alpha_
-        unfit = Ridge(alpha=model.alpha_)
+        unfit = RidgeCV(max_iter=iter)
     else:
-        model = ElasticNetCV(n_jobs=-1,l1_ratio=[.1, .5, .7, .9, .95, .99, 1])
+        model = ElasticNetCV(n_jobs=-1,l1_ratio=[.1, .5, .7, .9, .95, .99, 1],max_iter=iter)
         model.fit(x,y)
         print "Elastic alpha =",model.alpha_," l1_ratio =",model.l1_ratio_
-        unfit = ElasticNet(alpha=model.alpha_,l1_ratio=model.l1_ratio_,max_iter=10000)
+        unfit = ElasticNetCV(n_jobs=-1,max_iter=iter)
 
     return (model,unfit)
 
@@ -75,6 +76,7 @@ if __name__ == "__main__":
     parser.add_argument('-o','--outfile', type=argparse.FileType('w'), help="Output file for model (trained on full data)")
     parser.add_argument('-k','--kfolds',type=int,default=3,help="Number of folds for cross-validation")
     parser.add_argument('-y','--affinities',help="Affinities (y-values). Will override any specified in fingerprints file")
+    parser.add_argument('--maxiter',type=int,help="Maximum number of iterations for iterative methods.",default=1000)
     
     models = parser.add_mutually_exclusive_group()
     models.add_argument('--lasso',action='store_const',dest='model',const='lasso',help="Use LASSO linear model")
@@ -106,7 +108,7 @@ if __name__ == "__main__":
     x = np.array(data.iloc[:,2:],dtype=np.float)
     del data #dispose of pandas copy    
     
-    (fit,unfit) = trainmodels(args.model, x, y)
+    (fit,unfit) = trainmodels(args.model, x, y, args.maxiter)
     fitscore = scoremodel(fit,x,y)
     print "Full Regression: %.3f" % fitscore
     nz = np.count_nonzero(fit.coef_)
