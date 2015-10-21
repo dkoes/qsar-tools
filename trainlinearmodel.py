@@ -2,7 +2,7 @@
 
 import numpy as np
 import pandas as pd
-import argparse, sys
+import argparse, sys, pickle
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.linear_model import *
 from sklearn.cross_validation import KFold
@@ -21,7 +21,7 @@ def trainmodels(m, x, y):
         #have to manually cross-validate to choose number of components
         kf = KFold(len(y), n_folds=3)
         bestscore = -10000
-        
+        besti = 0
         for i in xrange(1,100):
             #try larger number of components until average CV perf decreases
             pls = PLSRegression(i)
@@ -37,15 +37,16 @@ def trainmodels(m, x, y):
                 scores.append(score)
                 
             ave = np.mean(scores)
-            if ave < bestscore: #assume larger is better
+            if ave < bestscore*0.95: #getting significantly worse
                 break
-            else:
+            elif ave > bestscore:
                 bestscore = ave
+                besti = i
         
-        model = PLSRegression(i) #i is where we stopped improving
+        model = PLSRegression(besti) 
         model.fit(x,y)
-        unfit = PLSRegression(i)
-        print "PLS components =",i
+        unfit = PLSRegression(besti)
+        print "PLS components =",besti
 
     elif m == 'lasso':
         model = LassoCV(max_iter=10000,n_jobs=-1)
@@ -59,7 +60,7 @@ def trainmodels(m, x, y):
         print "Ridge alpha =",model.alpha_
         unfit = Ridge(alpha=model.alpha_)
     else:
-        model = ElasticNetCV(max_iter=10000,n_jobs=-1)
+        model = ElasticNetCV(max_iter=10000,n_jobs=-1,l1_ratio=[.1, .5, .7, .9, .95, .99, 1])
         model.fit(x,y)
         print "Elastic alpha =",model.alpha_," l1_ratio =",model.l1_ratio_
         unfit = ElasticNet(alpha=model.alpha_,l1_ratio=model.l1_ratio_,max_iter=10000)
@@ -71,7 +72,7 @@ def trainmodels(m, x, y):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train linear model from fingerprint file')
     parser.add_argument('input',help='Fingerprints input file')
-    parser.add_argument('-o','--outfile', nargs='?', type=argparse.FileType('w'), default=sys.stdout)
+    parser.add_argument('-o','--outfile', type=argparse.FileType('w'), help="Output file for model (trained on full data)")
     parser.add_argument('-k','--kfolds',type=int,default=3,help="Number of folds for cross-validation")
     
     models = parser.add_mutually_exclusive_group()
@@ -112,3 +113,5 @@ if __name__ == "__main__":
     print "CV: %.3f (std %.3f)" %( np.mean(scores),np.std(scores))
     print "Gap: %.4f" % (fitscore-np.mean(scores))
             
+    if args.outfile:
+        pickle.dump(fit, args.outfile, pickle.HIGHEST_PROTOCOL)
