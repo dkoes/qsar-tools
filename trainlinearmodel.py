@@ -56,10 +56,10 @@ def trainmodels(m, x, y, iter=1000):
         print "LASSO alpha =",model.alpha_
         return (model,unfit)
     elif m == 'ridge':
-        model = RidgeCV(max_iter=iter)
+        model = RidgeCV()
         model.fit(x,y)
         print "Ridge alpha =",model.alpha_
-        unfit = RidgeCV(max_iter=iter)
+        unfit = RidgeCV()
     else:
         model = ElasticNetCV(n_jobs=-1,l1_ratio=[.1, .5, .7, .9, .95, .99, 1],max_iter=iter)
         model.fit(x,y)
