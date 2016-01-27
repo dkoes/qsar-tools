@@ -69,22 +69,25 @@ if __name__ == "__main__":
     smartcnts = collections.defaultdict(int) #count the number of molecules that have a given smart
     with open(args.smi) as f:
         for line in f:
-            if line.startswith('#') or len(line.strip()) == 0:
-                continue
-            else:
-                tokens = line.split()
-                mol = Chem.MolFromSmiles(tokens[0])
-                if args.type == 'path':
-                    smarts = computepathsmarts(mol, args.size)
-                elif args.type == 'circular':
-                    smarts = computecircularsmarts(mol, args.size)
-                elif args.type == 'subgraph':
-                    smarts = computesubgraphsmarts(mol, args.size)
-                else: #should never happen
-                    smarts = []
-                
-                for s in smarts:
-                    smartcnts[s] += 1
+            try:
+                if line.startswith('#') or len(line.strip()) == 0:
+                    continue
+                else:
+                    tokens = line.split()
+                    mol = Chem.MolFromSmiles(tokens[0])
+                    if args.type == 'path':
+                        smarts = computepathsmarts(mol, args.size)
+                    elif args.type == 'circular':
+                        smarts = computecircularsmarts(mol, args.size)
+                    elif args.type == 'subgraph':
+                        smarts = computesubgraphsmarts(mol, args.size)
+                    else: #should never happen
+                        smarts = []
+                    
+                    for s in smarts:
+                        smartcnts[s] += 1
+            except Exception as e:
+                sys.stderr.write("%s\nProblem with line: %s" % (e,line))
     
     for (smart,cnt) in smartcnts.iteritems():
         if cnt > args.cutoff:
