@@ -18,7 +18,7 @@ Given a fingerprint file train a linear model to predict
 a numerical quantity of interest.  This quantity is assumed to be the second
 column of the file.  Outputs model along with cross-validation statistics.
 
-## predict.py
+## applylinearmodel.py
 
 Given a model and a set of compounds, uses the model to predict the quantity 
 of interest.

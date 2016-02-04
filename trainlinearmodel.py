@@ -7,10 +7,16 @@ from sklearn.cross_decomposition import PLSRegression
 from sklearn.linear_model import *
 from sklearn.cross_validation import KFold
 
+def rms(x):
+    return np.sqrt(np.mean(x**2))
+    
 def scoremodel(model, x, y):
-    '''Return fitness of model. We'll use R'''
+    '''Return fitness of model. We'll use R^2 and RMS.
+       We also compare to the RMS with the mean.'''
     p = model.predict(x).squeeze()
-    return np.corrcoef(p,y)[0,1]
+    r = rms(p-y)
+    aver = rms(y-np.mean(y))  #RMS if we just used average
+    return np.corrcoef(p,y)[0,1]**2,r,aver
 
 def trainmodels(m, x, y, iter=1000):
     '''For the model type m, train a model on x->y using built-in CV to
@@ -110,7 +116,7 @@ if __name__ == "__main__":
     
     (fit,unfit) = trainmodels(args.model, x, y, args.maxiter)
     fitscore = scoremodel(fit,x,y)
-    print "Full Regression: %.3f" % fitscore
+    print "Full Regression: R^2=%.4f, RMS=%.4f, NullRMS=%.4f" % fitscore
     nz = np.count_nonzero(fit.coef_)
     print "Nonzeros: %d (%.2f%%)" % (nz,100.0*nz/float(len(fit.coef_)))
     kf = KFold(len(y), n_folds=3)
@@ -123,8 +129,8 @@ if __name__ == "__main__":
         unfit.fit(xtrain,ytrain)
         scores.append(scoremodel(unfit, xtest, ytest))
         
-    print "CV: %.3f (std %.3f)" %( np.mean(scores),np.std(scores))
-    print "Gap: %.4f" % (fitscore-np.mean(scores))
+    print "CV: R^2=%.4f, RMS=%.4f, NullRMS=%.4f (stds %.4f, %.4f, %.4f)" % (tuple(np.mean(scores, axis=0)) + tuple(np.std(scores,axis=0)))
+    print "Gap: R^2=%.4f, RMS=%.4f, NullRMS=%.4f" % tuple(fitscore-np.mean(scores,axis=0))
             
     if args.outfile:
         pickle.dump(fit, args.outfile, pickle.HIGHEST_PROTOCOL)
