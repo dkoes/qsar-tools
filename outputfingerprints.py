@@ -6,7 +6,11 @@ import sys,argparse,collections,re,gzip
 import numpy as np
 from rdkit.Chem import AllChem as Chem
 from rdkit.Chem import MACCSkeys
-
+try:
+    import pybel
+except ImportError:
+    print "Could not import pybel: FP2 fingerprints not supported"
+    
 def loadsmarts(fname):
     ret = []
     with open(fname) as f:
@@ -25,6 +29,7 @@ def addfpargs(parser):
     fp.add_argument('--ecfp4',action='store_const',dest='fp',const='ecfp4',help="Use ECFP4 fingerprints")
     fp.add_argument('--ecfp6',action='store_const',dest='fp',const='ecfp6',help="Use ECFP6 fingerprints")
     fp.add_argument('--maccs',action='store_const',dest='fp',const='maccs',help="Use MACCS fingerprints")
+    fp.add_argument('--fp2',action='store_const',dest='fp',const='fp2',help="Use OpenBabel FP2 fingerprints")
     fp.add_argument('--smarts',action='store_const',dest='fp',const='smarts',help="Use SMARTS fingerprints (must provide file)")
     parser.set_defaults(fp='rdkit')
 
@@ -58,6 +63,18 @@ def calcfingerprint(mol, args):
         else:
             sys.stderr.write("ERROR: Must provide SMARTS file with --smarts\n")
             sys.exit(-1)
+    elif args.fp == 'fp2':
+        smi = Chem.MolToSmiles(mol) 
+        obmol = pybel.readstring('smi',smi)
+        fp = obmol.calcfp(fptype='FP2')
+        ret = [0]*1021 #FP2 are mod 1021
+        for setbit in fp.bits:
+            #but pybel makes the bits start at 1 for some reason
+            assert(setbit>0)
+            ret[setbit-1] = 1
+            
+        return ret
+        
     else:
         return []
 
