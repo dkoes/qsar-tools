@@ -29,7 +29,7 @@ def trainmodels(m, x, y, iter=1000):
         kf = KFold(len(y), n_folds=3)
         bestscore = -10000
         besti = 0
-        for i in xrange(1,100):
+        for i in xrange(1,min(100,len(x[0]))):
             #try larger number of components until average CV perf decreases
             pls = PLSRegression(i)
             scores = []
