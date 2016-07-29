@@ -106,14 +106,17 @@ if __name__ == "__main__":
     
     for (mol,w) in zip(mols,weights):        
         fig = SimilarityMaps.GetSimilarityMapFromWeights(mol, w, size=size, scale=scale,sigma=sigma,colorMap=colors,contourLines=1,alpha=0) #alpha hides contour lines
-        
+
         if not args.labels:
             #I don't like white boxes on labels
             for elem in fig.axes[0].get_children():
                 if isinstance(elem, matplotlib.text.Text):
                     elem.set_visible(False)
+                elif isinstance(elem, matplotlib.image.AxesImage):
+                    fig.colorbar(elem)
 
         plt.axis("off")
+           
         plt.savefig('%s.png' % mol.title,bbox_inches='tight')
 
         
