@@ -5,7 +5,7 @@ import pandas as pd
 import argparse, sys, pickle
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.linear_model import *
-from sklearn.cross_validation import KFold
+from sklearn.model_selection import KFold
 
 def rms(x):
     return np.sqrt(np.mean(x**2))
@@ -16,6 +16,9 @@ def scoremodel(model, x, y):
     p = model.predict(x).squeeze()
     r = rms(p-y)
     aver = rms(y-np.mean(y))  #RMS if we just used average
+    if np.std(p) == 0.0 or np.std(y) == 0: #R not defined
+        return 0,r,aver
+        
     return np.corrcoef(p,y)[0,1]**2,r,aver
 
 def trainmodels(m, x, y, iter=1000):
@@ -26,7 +29,7 @@ def trainmodels(m, x, y, iter=1000):
     
     if m == 'pls':
         #have to manually cross-validate to choose number of components
-        kf = KFold(len(y), n_folds=3)
+        kf = KFold(n_splits=3)
         bestscore = -10000
         besti = 0
         for i in xrange(1,min(100,len(x[0]))):
@@ -34,7 +37,7 @@ def trainmodels(m, x, y, iter=1000):
             pls = PLSRegression(i)
             scores = []
             #TODO: parallelize below
-            for train,test in kf:
+            for train,test in kf.split(x):
                 xtrain = x[train]
                 ytrain = y[train]
                 xtest = x[test]
@@ -119,9 +122,9 @@ if __name__ == "__main__":
     print "Full Regression: R^2=%.4f, RMS=%.4f, NullRMS=%.4f" % fitscore
     nz = np.count_nonzero(fit.coef_)
     print "Nonzeros: %d (%.2f%%)" % (nz,100.0*nz/float(len(fit.coef_)))
-    kf = KFold(len(y), n_folds=3)
+    kf = KFold(n_splits=3)
     scores = []
-    for train,test in kf:
+    for train,test in kf.split(x):
         xtrain = x[train]
         ytrain = y[train]
         xtest = x[test]
