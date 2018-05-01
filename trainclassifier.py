@@ -7,10 +7,11 @@ from sklearn.cross_decomposition import PLSRegression
 from sklearn.linear_model import *
 from sklearn.model_selection import KFold
 from sklearn.metrics import *
-from sklearn import svm
+from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
-    
+from sklearn.model_selection import GridSearchCV
+
 def scoremodel(model, x, y):
     '''Return fitness of model. We'll use AUC.'''
     p = model.predict(x).squeeze()
@@ -49,21 +50,29 @@ def trainmodels(m, x, y):
         
         model = KNeighborsClassifier(besti) 
         model.fit(x,y)
+        print "Best k = %d"%besti
         unfit = KNeighborsClassifier(besti)  #choose number of components using full data - iffy
     elif m == 'svm':
-        #TODO: paramter optimization
-        model = svm.SVC()
-        model.fit(x,y)
-        unfit = svm.SVC() 
+        C_range = np.logspace(-2, 10, 13)
+        gamma_range = np.logspace(-9, 3, 13)
+        param_grid = dict(gamma=gamma_range, C=C_range)
+        grid = GridSearchCV(SVC(), param_grid=param_grid,n_jobs=-1)
+        grid.fit(x,y)
+        print "svm params",grid.best_params_
+        model = grid.best_estimator_
+        unfit = SVC(**grid.best_params_)
     elif m == 'logistic':
         model = LogisticRegressionCV(n_jobs=-1)
         model.fit(x,y)
         unfit = LogisticRegressionCV(n_jobs=-1)
     elif m == 'rf':
-        #TODO: samae
-        model = RandomForestClassifier()
-        model.fit(x,y)
-        unfit = RandomForestClassifier()
+        #evalute different max depths
+        parameters = {'max_depth': range(2,int(np.log2(len(x[0])))+1)}
+        clf = GridSearchCV(RandomForestClassifier(), parameters, 'roc_auc',n_jobs=-1)
+        clf.fit(x,y)
+        model = clf.best_estimator_
+        print "max_depth =",clf.best_params_['max_depth']
+        unfit = RandomForestClassifier(**clf.best_params_)
 
 
     return (model,unfit)
