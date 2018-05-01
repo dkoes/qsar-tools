@@ -107,7 +107,7 @@ if __name__ == "__main__":
     x = np.array(data.iloc[:,2:],dtype=np.float)
     del data #dispose of pandas copy    
     
-    (fit,unfit) = trainmodels(args.model, x, y, args.maxiter)
+    (fit,unfit) = trainmodels(args.model, x, y)
     fitscore = scoremodel(fit,x,y)
     print "Full Regression: AUC=%.4f" % fitscore
 
@@ -122,7 +122,7 @@ if __name__ == "__main__":
         scores.append(scoremodel(unfit, xtest, ytest))
         
     print "CV: AUC=%.4f (std %.4f)" % (np.mean(scores), np.std(scores))
-    print "Gap: %.4f" % fitscore-np.mean(scores)
+    print "Gap: %.4f" % (fitscore-np.mean(scores))
             
     if args.outfile:
         pickle.dump(fit, args.outfile, pickle.HIGHEST_PROTOCOL)

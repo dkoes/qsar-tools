@@ -5,6 +5,7 @@ import pandas as pd
 import argparse, sys, pickle
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.linear_model import *
+from sklearn.metrics import r2_score
 from sklearn.model_selection import KFold
 
 def rms(x):
@@ -19,7 +20,7 @@ def scoremodel(model, x, y):
     if np.std(p) == 0.0 or np.std(y) == 0: #R not defined
         return 0,r,aver
         
-    return np.corrcoef(p,y)[0,1]**2,r,aver
+    return np.corrcoef(p,y)[0][1]**2,r,aver
 
 def trainmodels(m, x, y, iter=1000):
     '''For the model type m, train a model on x->y using built-in CV to
