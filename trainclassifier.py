@@ -53,8 +53,8 @@ def trainmodels(m, x, y):
         print "Best k = %d"%besti
         unfit = KNeighborsClassifier(besti)  #choose number of components using full data - iffy
     elif m == 'svm':
-        C_range = np.logspace(-2, 10, 13)
-        gamma_range = np.logspace(-9, 3, 13)
+        C_range = np.logspace(-2, 3, 6)
+        gamma_range = np.logspace(-9, 3, 7)
         param_grid = dict(gamma=gamma_range, C=C_range)
         grid = GridSearchCV(SVC(), param_grid=param_grid,n_jobs=-1)
         grid.fit(x,y)
