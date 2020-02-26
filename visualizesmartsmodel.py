@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import numpy as np
 import argparse, sys, pickle, math, rdkit, matplotlib
@@ -12,10 +12,26 @@ from matplotlib import colorbar
 from matplotlib import cm
 from numpy.random import randn
 import matplotlib.patheffects as PathEffects
-import matlab
 import warnings
 
 warnings.simplefilter('ignore', FutureWarning)
+
+def bivariate_normal(X, Y, sigmax=1.0, sigmay=1.0,
+                     mux=0.0, muy=0.0, sigmaxy=0.0):
+    """
+    Bivariate Gaussian distribution for equal shape *X*, *Y*.
+    See `bivariate normal
+    <http://mathworld.wolfram.com/BivariateNormalDistribution.html>`_
+    at mathworld.
+
+    """
+    Xmu = X-mux
+    Ymu = Y-muy
+
+    rho = sigmaxy/(sigmax*sigmay)
+    z = Xmu**2/sigmax**2 + Ymu**2/sigmay**2 - 2*rho*Xmu*Ymu/(sigmax*sigmay)
+    denom = 2*np.pi*sigmax*sigmay*np.sqrt(1-rho**2)
+    return np.exp(-z/(2*(1-rho**2))) / denom
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Visually map model trained using smarts patterns onto molecule. Will output similarity maps.')
@@ -111,7 +127,7 @@ if __name__ == "__main__":
         idx2 = bond.GetEndAtomIdx() 
         sigma = 0.5 * math.sqrt(sum([(mol._atomPs[idx1][i] - mol._atomPs[idx2][i]) ** 2 for i in range(2)]))
 
-    scale = matlab.bivariate_normal(0, 0, sigma, sigma, 0, 0)
+    scale = bivariate_normal(0, 0, sigma, sigma, 0, 0)
     
     for (mol, w, normw) in zip(mols, weights, normweights):        
         fig = SimilarityMaps.GetSimilarityMapFromWeights(mol, normw, size=size, scale=scale, sigma=sigma, colorMap=colors, contourLines=1, alpha=0, coordscale=1)  # alpha hides contour lines

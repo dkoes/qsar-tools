@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import numpy as np
 import pandas as pd
@@ -35,5 +35,5 @@ if __name__ == "__main__":
     p = model.predict(x).squeeze()
     
     for (m, score) in zip(smi,p):
-        print m,score
+        print(m,score)
 

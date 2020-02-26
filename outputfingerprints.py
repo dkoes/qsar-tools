@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''Routines for creating count and binary fingerprints from molecules'''
 
@@ -9,7 +9,7 @@ from rdkit.Chem import MACCSkeys
 try:
     import pybel
 except ImportError:
-    print "Could not import pybel: FP2 fingerprints not supported"
+    print("Could not import pybel: FP2 fingerprints not supported")
     
 def loadsmarts(fname):
     ret = []
@@ -107,4 +107,4 @@ if __name__ == "__main__":
                 if len(tokens) == 1: aff = "_"  #if no affinity, blank
                 out.write('%s %s %s\n' % (tokens[0],aff,' '.join(map(str,fp))))
             else:
-                print "Problem with",tokens[0]
+                print("Problem with",tokens[0])

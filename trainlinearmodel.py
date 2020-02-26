@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import numpy as np
 import pandas as pd
@@ -57,23 +57,23 @@ def trainmodels(m, x, y, iter=1000):
         model = PLSRegression(besti) 
         model.fit(x,y)
         unfit = PLSRegression(besti)  #choose number of components using full data - iffy
-        print "PLS components =",besti
+        print("PLS components =",besti)
 
     elif m == 'lasso':
         model = LassoCV(n_jobs=-1,max_iter=iter)
         model.fit(x,y)
         unfit = LassoCV(n_jobs=-1,max_iter=iter) #(alpha=model.alpha_)
-        print "LASSO alpha =",model.alpha_
+        print("LASSO alpha =",model.alpha_)
         return (model,unfit)
     elif m == 'ridge':
         model = RidgeCV()
         model.fit(x,y)
-        print "Ridge alpha =",model.alpha_
+        print("Ridge alpha =",model.alpha_)
         unfit = RidgeCV()
     else:
         model = ElasticNetCV(n_jobs=-1,l1_ratio=[.1, .5, .7, .9, .95, .99, 1],max_iter=iter)
         model.fit(x,y)
-        print "Elastic alpha =",model.alpha_," l1_ratio =",model.l1_ratio_
+        print("Elastic alpha =",model.alpha_," l1_ratio =",model.l1_ratio_)
         unfit = ElasticNetCV(n_jobs=-1,max_iter=iter)
 
     return (model,unfit)
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     if args.affinities: #override what is in fingerprint file
         y = np.genfromtxt(args.affinities,np.float)
         if len(y) != len(data):
-            print "Mismatched length between affinities and fingerprints (%d vs %d)" % (len(y),len(x))
+            print("Mismatched length between affinities and fingerprints (%d vs %d)" % (len(y),len(x)))
             sys.exit(-1)
         data.iloc[:,1] = y
     
@@ -120,9 +120,9 @@ if __name__ == "__main__":
     
     (fit,unfit) = trainmodels(args.model, x, y, args.maxiter)
     fitscore = scoremodel(fit,x,y)
-    print "Full Regression: R^2=%.4f, RMS=%.4f, NullRMS=%.4f" % fitscore
+    print("Full Regression: R^2=%.4f, RMS=%.4f, NullRMS=%.4f" % fitscore)
     nz = np.count_nonzero(fit.coef_)
-    print "Nonzeros: %d (%.2f%%)" % (nz,100.0*nz/float(len(fit.coef_)))
+    print("Nonzeros: %d (%.2f%%)" % (nz,100.0*nz/float(len(fit.coef_))))
     kf = KFold(n_splits=3)
     scores = []
     for train,test in kf.split(x):
@@ -133,8 +133,8 @@ if __name__ == "__main__":
         unfit.fit(xtrain,ytrain)
         scores.append(scoremodel(unfit, xtest, ytest))
         
-    print "CV: R^2=%.4f, RMS=%.4f, NullRMS=%.4f (stds %.4f, %.4f, %.4f)" % (tuple(np.mean(scores, axis=0)) + tuple(np.std(scores,axis=0)))
-    print "Gap: R^2=%.4f, RMS=%.4f, NullRMS=%.4f" % tuple(fitscore-np.mean(scores,axis=0))
+    print("CV: R^2=%.4f, RMS=%.4f, NullRMS=%.4f (stds %.4f, %.4f, %.4f)" % (tuple(np.mean(scores, axis=0)) + tuple(np.std(scores,axis=0))))
+    print("Gap: R^2=%.4f, RMS=%.4f, NullRMS=%.4f" % tuple(fitscore-np.mean(scores,axis=0)))
             
     if args.outfile:
         pickle.dump(fit, args.outfile, pickle.HIGHEST_PROTOCOL)

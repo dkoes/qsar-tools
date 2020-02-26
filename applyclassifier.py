@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 '''Apply a classification model trained with trainclassifier.py'''
 import numpy as np
 import pandas as pd
@@ -25,8 +25,8 @@ if __name__ == "__main__":
     model = pickle.load(open(args.model))
     p = model.predict(x).squeeze()
     for (m, score) in zip(smi,p):
-        print m,score
+        print(m,score)
 
     y = np.array(data.iloc[:,1],dtype=np.float)
-    print "AUC = %.4f"%roc_auc_score(y,p)
+    print("AUC = %.4f"%roc_auc_score(y,p))
 
