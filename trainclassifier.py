@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import numpy as np
 import pandas as pd
@@ -50,7 +50,7 @@ def trainmodels(m, x, y):
         
         model = KNeighborsClassifier(besti) 
         model.fit(x,y)
-        print "Best k = %d"%besti
+        print("Best k = %d"%besti)
         unfit = KNeighborsClassifier(besti)  #choose number of components using full data - iffy
     elif m == 'svm':
         C_range = np.logspace(-2, 3, 6)
@@ -58,7 +58,7 @@ def trainmodels(m, x, y):
         param_grid = dict(gamma=gamma_range, C=C_range)
         grid = GridSearchCV(SVC(), param_grid=param_grid,n_jobs=-1)
         grid.fit(x,y)
-        print "svm params",grid.best_params_
+        print("svm params",grid.best_params_)
         model = grid.best_estimator_
         unfit = SVC(**grid.best_params_)
     elif m == 'logistic':
@@ -71,7 +71,7 @@ def trainmodels(m, x, y):
         clf = GridSearchCV(RandomForestClassifier(), parameters, 'roc_auc',n_jobs=-1)
         clf.fit(x,y)
         model = clf.best_estimator_
-        print "max_depth =",clf.best_params_['max_depth']
+        print("max_depth =",clf.best_params_['max_depth'])
         unfit = RandomForestClassifier(**clf.best_params_)
 
 
@@ -82,7 +82,7 @@ def trainmodels(m, x, y):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train linear model from fingerprint file')
     parser.add_argument('input',help='Fingerprints input file')
-    parser.add_argument('-o','--outfile', type=argparse.FileType('w'), help="Output file for model (trained on full data)")
+    parser.add_argument('-o','--outfile', type=argparse.FileType('wb'), help="Output file for model (trained on full data)")
     parser.add_argument('-k','--kfolds',type=int,default=3,help="Number of folds for cross-validation")
     parser.add_argument('-y','--labels',help="Labels (y-values). Will override any specified in fingerprints file")
     
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     parser.set_defaults(model='knn')
     
     args = parser.parse_args()
-    out = args.outfile
+    #out = args.outfile
     
     comp = 'gzip' if args.input.endswith('.gz') else None
     data = pd.read_csv(args.input,compression=comp,header=None,delim_whitespace=True)
@@ -103,7 +103,7 @@ if __name__ == "__main__":
     if args.labels: #override what is in fingerprint file
         y = np.genfromtxt(args.labels,np.float)
         if len(y) != len(data):
-            print "Mismatched length between affinities and fingerprints (%d vs %d)" % (len(y),len(x))
+            print("Mismatched length between affinities and fingerprints (%d vs %d)" % (len(y),len(x)))
             sys.exit(-1)
         data.iloc[:,1] = y
     
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     
     (fit,unfit) = trainmodels(args.model, x, y)
     fitscore = scoremodel(fit,x,y)
-    print "Full Regression: AUC=%.4f" % fitscore
+    print("Full Regression: AUC=%.4f" % fitscore)
 
     kf = KFold(n_splits=3)
     scores = []
@@ -130,8 +130,8 @@ if __name__ == "__main__":
         unfit.fit(xtrain,ytrain)
         scores.append(scoremodel(unfit, xtest, ytest))
         
-    print "CV: AUC=%.4f (std %.4f)" % (np.mean(scores), np.std(scores))
-    print "Gap: %.4f" % (fitscore-np.mean(scores))
+    print("CV: AUC=%.4f (std %.4f)" % (np.mean(scores), np.std(scores)))
+    print("Gap: %.4f" % (fitscore-np.mean(scores)))
             
     if args.outfile:
         pickle.dump(fit, args.outfile, pickle.HIGHEST_PROTOCOL)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''Routines for enumerating SMARTS expressions representing fragments of provided molecules'''
 
@@ -9,7 +9,7 @@ from rdkit.Chem import AllChem as Chem
 def computepathsmarts(mol, size):
     if size <= 0: size = 7 # default to 7 atoms
     ret = set()
-    for length in xrange(2,size+1):
+    for length in range(2,size+1):
         paths = Chem.FindAllPathsOfLengthN(mol, length, useBonds=False)
         for path in paths:
             smi = Chem.MolFragmentToSmiles(mol, path, canonical=True, allBondsExplicit=True)
@@ -40,7 +40,7 @@ def computecircularsmarts(mol, size):
     if size <= 0: size = 2
     ret = set()
     for a in mol.GetAtoms():
-        for r in xrange(1,size+1):
+        for r in range(1,size+1):
             env = Chem.FindAtomEnvironmentOfRadiusN(mol,r,a.GetIdx())
             atoms=set()
             for bidx in env:
@@ -89,6 +89,6 @@ if __name__ == "__main__":
             except Exception as e:
                 sys.stderr.write("%s\nProblem with line: %s" % (e,line))
     
-    for (smart,cnt) in smartcnts.iteritems():
+    for (smart,cnt) in smartcnts.items():
         if cnt > args.cutoff:
             args.outfile.write('%s %d\n' % (smart,cnt))
