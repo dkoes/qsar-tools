@@ -82,7 +82,7 @@ def trainmodels(m, x, y):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train linear model from fingerprint file')
     parser.add_argument('input',help='Fingerprints input file')
-    parser.add_argument('-o','--outfile', type=argparse.FileType('w'), help="Output file for model (trained on full data)")
+    parser.add_argument('-o','--outfile', type=argparse.FileType('wb'), help="Output file for model (trained on full data)")
     parser.add_argument('-k','--kfolds',type=int,default=3,help="Number of folds for cross-validation")
     parser.add_argument('-y','--labels',help="Labels (y-values). Will override any specified in fingerprints file")
     
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     parser.set_defaults(model='knn')
     
     args = parser.parse_args()
-    out = args.outfile
+    #out = args.outfile
     
     comp = 'gzip' if args.input.endswith('.gz') else None
     data = pd.read_csv(args.input,compression=comp,header=None,delim_whitespace=True)

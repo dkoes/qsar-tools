@@ -23,6 +23,18 @@ column of the file.  Outputs model along with cross-validation statistics.
 Given a model and a set of compounds, uses the model to predict the quantity 
 of interest.
 
+## trainclassifier.py
+
+Given a fingerprint file train a classifier model to predict
+a the class of interest. Does NOT support multiple classes.
+This quantity is assumed to be the second column of the file.
+Outputs model along with cross-validation statistics.
+
+## applyclassifier.py
+
+Given a model and a set of compounds, uses the model to predict the class 
+of interest.
+
 ## visualizesmartsmodel.py
 
 Given a model trained using smarts descriptors and a compound, map the model

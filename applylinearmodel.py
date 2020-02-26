@@ -31,7 +31,7 @@ if __name__ == "__main__":
     x = np.array(data.iloc[:,2:],dtype=np.float)
     smi = data.iloc[:,0]
 
-    model = pickle.load(open(args.model))
+    model = pickle.load(open(args.model,'rb'))
     p = model.predict(x).squeeze()
     
     for (m, score) in zip(smi,p):

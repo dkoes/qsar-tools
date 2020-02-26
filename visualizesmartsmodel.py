@@ -35,7 +35,7 @@ def bivariate_normal(X, Y, sigmax=1.0, sigmay=1.0,
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Visually map model trained using smarts patterns onto molecule. Will output similarity maps.')
-    parser.add_argument('model', type=argparse.FileType('r'), help='Model file')
+    parser.add_argument('model', type=argparse.FileType('rb'), help='Model file')
     parser.add_argument('smarts', type=argparse.FileType('r'), help='SMARTS file')
     parser.add_argument('smi', type=argparse.FileType('r'), help='SMILES file to annotate')
     parser.add_argument('--size', type=int, default=250, help='Image size')
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     coefs = model.coef_
     nonzeroes = np.nonzero(coefs)[0]
     if len(coefs) != len(smarts):
-        print "Mismatch between model size and number fo smarts (%d vs %d)" % (len(coefs), len(smarts))
+        print("Mismatch between model size and number fo smarts (%d vs %d)" % (len(coefs), len(smarts)))
         sys.exit(-1)
         
     # process each cmpd, save weights and mol - want to
@@ -91,8 +91,8 @@ if __name__ == "__main__":
                     
         weights.append(atomcontribs)
         maxval = max(maxval, np.max(np.abs(atomcontribs)))
-	
-        Chem.Compute2DCoords(mol)	
+    
+        Chem.Compute2DCoords(mol)   
 
 #    print index, len(annotateWeights)
         
@@ -136,16 +136,16 @@ if __name__ == "__main__":
             # I don't like white boxes on labels 
             for elem in fig.axes[0].get_children():
                 if isinstance(elem, matplotlib.text.Text):
-                    elem.set_visible(False)		   
-		    
-    	plt.axis("off")
-    		
-    	# this is the code that plots the weights to the compounds. 
+                    elem.set_visible(False)        
+            
+        plt.axis("off")
+            
+        # this is the code that plots the weights to the compounds. 
         if args.weights:
-            for at in xrange(mol.GetNumAtoms()):
+            for at in range(mol.GetNumAtoms()):
                 x = mol._atomPs[at][0]
                 y = mol._atomPs[at][1]
-                plt.text(x, y, '%.2f' % w[at], path_effects=[PathEffects.withStroke(linewidth=1, foreground="blue")])	    
+                plt.text(x, y, '%.2f' % w[at], path_effects=[PathEffects.withStroke(linewidth=1, foreground="blue")])       
     
-        plt.savefig('%s.png' % mol.title, bbox_inches='tight')	       
-	
+        plt.savefig('%s.png' % mol.title, bbox_inches='tight')         
+    
