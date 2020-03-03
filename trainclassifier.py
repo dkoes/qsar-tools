@@ -29,7 +29,7 @@ def trainmodels(m, x, y):
         kf = KFold(n_splits=3)
         bestscore = -10000
         besti = 0
-        for i in xrange(1,10):
+        for i in range(1,10):
             #try larger number of components until average CV perf decreases
             knn = KNeighborsClassifier(i)
             scores = []
