@@ -21,7 +21,6 @@ def scoremodel(model, x, y):
 def trainmodels(m, x, y):
     '''For the model type m, train a classifier on x->y using built-in CV to
     parameterize.  Return both this model and an unfit model that can be used for CV.
-    Note for PLS we cheat a little bit since there isn't a built-in CV trainer.
     '''
     
     if m == 'knn':
@@ -120,7 +119,7 @@ if __name__ == "__main__":
     fitscore = scoremodel(fit,x,y)
     print("Full Regression: AUC=%.4f" % fitscore)
 
-    kf = KFold(n_splits=3)
+    kf = KFold(n_splits=args.kfolds)
     scores = []
     for train,test in kf.split(x):
         xtrain = x[train]
@@ -130,7 +129,7 @@ if __name__ == "__main__":
         unfit.fit(xtrain,ytrain)
         scores.append(scoremodel(unfit, xtest, ytest))
         
-    print("CV: AUC=%.4f (std %.4f)" % (np.mean(scores), np.std(scores)))
+    print(f"{args.kfolds}-fold CV: AUC=%.4f (std %.4f)" % (np.mean(scores), np.std(scores)))
     print("Gap: %.4f" % (fitscore-np.mean(scores)))
             
     if args.outfile:
