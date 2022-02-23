@@ -33,7 +33,7 @@ def trainmodels(m, x, y, iter=1000):
         kf = KFold(n_splits=3)
         bestscore = -10000
         besti = 0
-        for i in xrange(1,min(100,len(x[0]))):
+        for i in range(1,min(100,len(x[0]))):
             #try larger number of components until average CV perf decreases
             pls = PLSRegression(i)
             scores = []
@@ -122,8 +122,8 @@ if __name__ == "__main__":
     fitscore = scoremodel(fit,x,y)
     print ("Full Regression: R^2=%.4f, RMS=%.4f, NullRMS=%.4f" % fitscore)
     nz = np.count_nonzero(fit.coef_)
-    print ("Nonzeros: %d (%.2f%%)" % (nz,100.0*nz/float(len(fit.coef_))))
-    kf = KFold(n_splits=3)
+    print("Nonzeros: %d (%.2f%%)" % (nz,100.0*nz/float(len(fit.coef_))))
+    kf = KFold(n_splits=args.kfolds)
     scores = []
     for train,test in kf.split(x):
         xtrain = x[train]
@@ -133,7 +133,7 @@ if __name__ == "__main__":
         unfit.fit(xtrain,ytrain)
         scores.append(scoremodel(unfit, xtest, ytest))
         
-    print("CV: R^2=%.4f, RMS=%.4f, NullRMS=%.4f (stds %.4f, %.4f, %.4f)" % (tuple(np.mean(scores, axis=0)) + tuple(np.std(scores,axis=0))))
+    print(f"{args.kfolds}-fold CV: R^2=%.4f, RMS=%.4f, NullRMS=%.4f (stds %.4f, %.4f, %.4f)" % (tuple(np.mean(scores, axis=0)) + tuple(np.std(scores,axis=0))))
     print("Gap: R^2=%.4f, RMS=%.4f, NullRMS=%.4f" % tuple(fitscore-np.mean(scores,axis=0)))
             
     if args.outfile:

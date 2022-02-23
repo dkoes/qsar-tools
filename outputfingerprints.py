@@ -49,7 +49,7 @@ def calcfingerprint(mol, args):
         return [int(x) for x in fp.ToBitString()]
     elif args.fp.startswith('ecfp'):
         diameter = int(args.fp.replace('ecfp',''))
-        r = int(diameter/2)
+        r = diameter//2
         fp = Chem.GetMorganFingerprintAsBitVect(mol,r,nBits=args.fpbits)
         return [int(x) for x in fp.ToBitString()]
     elif args.fp == 'maccs':
