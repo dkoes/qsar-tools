@@ -2,14 +2,17 @@
 
 '''Routines for creating count and binary fingerprints from molecules'''
 
-import sys,argparse,collections,re,gzip
+import sys,argparse,collections,re,gzip,io
 import numpy as np
 from rdkit.Chem import AllChem as Chem
 from rdkit.Chem import MACCSkeys
 try:
     import pybel
 except ImportError:
-    print("Could not import pybel: FP2 fingerprints not supported")
+    try:
+        from openbabel import pybel
+    except ImportError:
+        print("Could not import pybel: FP2 fingerprints not supported")
     
 def loadsmarts(fname):
     ret = []
@@ -33,7 +36,7 @@ def addfpargs(parser):
     fp.add_argument('--smarts',action='store_const',dest='fp',const='smarts',help="Use SMARTS fingerprints (must provide file)")
     parser.set_defaults(fp='rdkit')
 
-    parser.add_argument('--fpbits',type=int,default=2048,help="Number of bits to use in folded fingerprints")
+    parser.add_argument('--fpbits',type=int,default=2048,help="Number of bits to use in folded fingerprints. Default: 2048")
     parser.add_argument('--smartsfile',type=loadsmarts,help="File SMARTS to use for smarts fingerprints")
 
 
@@ -81,17 +84,17 @@ def calcfingerprint(mol, args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Output fingerprints in plain text')
     parser.add_argument('smi',help='SMILES input file')
-    parser.add_argument('-o','--outfile', nargs='?', type=argparse.FileType('w'), default=sys.stdout)
+    parser.add_argument('-o','--outfile', nargs='?', type=str, default=sys.stdout)
     
     addfpargs(parser)
     
     args = parser.parse_args()
     
     #support gzipped output - these files are big
-    if args.outfile.name.endswith('.gz'):
-        out = gzip.GzipFile(fileobj=args.outfile)
+    if args.outfile.endswith('.gz'):
+        out = gzip.open(args.outfile,mode='wt',encoding='utf-8')
     else:
-        out = args.outfile
+        out = open(args.outfile,'w')
         
     with open(args.smi) as f:
         for line in f:
@@ -105,6 +108,7 @@ if __name__ == "__main__":
                 #hopefully the last thing is the affinity?
                 aff = tokens[-1]
                 if len(tokens) == 1: aff = "_"  #if no affinity, blank
-                out.write('%s %s %s\n' % (tokens[0],aff,' '.join(map(str,fp))))
+                line='%s %s %s\n' % (tokens[0],aff,' '.join(map(str,fp)))
+                out.write(line)
             else:
                 print("Problem with",tokens[0])

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import numpy as np
 import pandas as pd
@@ -57,7 +57,7 @@ def trainmodels(m, x, y, iter=1000):
         model = PLSRegression(besti) 
         model.fit(x,y)
         unfit = PLSRegression(besti)  #choose number of components using full data - iffy
-        print ("PLS components =",besti)
+        print("PLS components =",besti)
 
     elif m == 'lasso':
         model = LassoCV(n_jobs=-1,max_iter=iter)
@@ -73,7 +73,7 @@ def trainmodels(m, x, y, iter=1000):
     else:
         model = ElasticNetCV(n_jobs=-1,l1_ratio=[.1, .5, .7, .9, .95, .99, 1],max_iter=iter)
         model.fit(x,y)
-        print ("Elastic alpha =",model.alpha_," l1_ratio =",model.l1_ratio_)
+        print("Elastic alpha =",model.alpha_," l1_ratio =",model.l1_ratio_)
         unfit = ElasticNetCV(n_jobs=-1,max_iter=iter)
 
     return (model,unfit)
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     parser.set_defaults(model='lasso')
     
     args = parser.parse_args()
-    out = args.outfile
+    #out = args.outfile
     
     comp = 'gzip' if args.input.endswith('.gz') else None
     data = pd.read_csv(args.input,compression=comp,header=None,delim_whitespace=True)
@@ -114,8 +114,8 @@ if __name__ == "__main__":
     smi = np.array(data.iloc[:,0])
     
 
-    y = np.array(data.iloc[:,1],dtype=np.float)
-    x = np.array(data.iloc[:,2:],dtype=np.float)
+    y = np.array(data.iloc[:,1],dtype=float)
+    x = np.array(data.iloc[:,2:],dtype=float)
     del data #dispose of pandas copy    
     
     (fit,unfit) = trainmodels(args.model, x, y, args.maxiter)
@@ -133,8 +133,8 @@ if __name__ == "__main__":
         unfit.fit(xtrain,ytrain)
         scores.append(scoremodel(unfit, xtest, ytest))
         
-    print ("CV: R^2=%.4f, RMS=%.4f, NullRMS=%.4f (stds %.4f, %.4f, %.4f)" % (tuple(np.mean(scores, axis=0)) + tuple(np.std(scores,axis=0))))
-    print ("Gap: R^2=%.4f, RMS=%.4f, NullRMS=%.4f" % tuple(fitscore-np.mean(scores,axis=0)))
+    print("CV: R^2=%.4f, RMS=%.4f, NullRMS=%.4f (stds %.4f, %.4f, %.4f)" % (tuple(np.mean(scores, axis=0)) + tuple(np.std(scores,axis=0))))
+    print("Gap: R^2=%.4f, RMS=%.4f, NullRMS=%.4f" % tuple(fitscore-np.mean(scores,axis=0)))
             
     if args.outfile:
         pickle.dump(fit, args.outfile )
